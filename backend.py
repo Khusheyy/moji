@@ -52,11 +52,21 @@ def predict():
         # Convert to PIL Image
         image = Image.open(io.BytesIO(image_bytes)).convert('L')  # Grayscale
         
-        # Resize to 28x28
-        image = image.resize((28, 28))
+        # Resize to 28x28 using LANCZOS for better quality
+        image = image.resize((28, 28), Image.Resampling.LANCZOS)
         
-        # Convert to numpy array and normalize (0-1)
-        image_array = np.array(image).astype('float32') / 255.0
+        # Convert to numpy array
+        image_array = np.array(image).astype('float32')
+        
+        # MNIST format: black background (0) with white digits (255)
+        # Our canvas: white background (255) with black strokes (0)
+        # So we need to invert to match MNIST format
+        image_array = 255.0 - image_array
+        
+        # Normalize to 0-1 range (same as training: / 255.0)
+        image_array = image_array / 255.0
+        
+        # Reshape for model input
         image_array = image_array.reshape(1, 28, 28, 1)  # Add batch and channel dimensions
         
         # Predict
@@ -64,7 +74,14 @@ def predict():
         predicted_digit = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
         
-        return jsonify({'digit': int(predicted_digit), 'confidence': confidence})
+        # Return all probabilities for visualization
+        probabilities = [float(p) for p in predictions[0]]
+        
+        return jsonify({
+            'digit': int(predicted_digit), 
+            'confidence': confidence,
+            'probabilities': probabilities
+        })
     except Exception as e:
         import traceback
         error_msg = str(e)
@@ -73,6 +90,6 @@ def predict():
         return jsonify({'error': error_msg}), 400
 
 if __name__ == '__main__':
-    print("Starting Flask server on http://127.0.0.1:5000")
+    print("Starting Flask server on http://127.0.0.1:8080")
     print("Make sure the backend is running before using the frontend!")
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)

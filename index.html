@@ -3,20 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digit Recognition</title>
+    <title>Nexa - Handwritten Digit Recognition</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
+        h1 { font-size: 36px; margin-bottom: 10px; color: #333; }
+        .subtitle { font-size: 14px; color: #666; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
         canvas { border: 1px solid #000; cursor: crosshair; }
         button { margin: 10px; padding: 10px 20px; }
         #result { margin-top: 20px; font-size: 18px; }
+        
+        .nn-container {
+            margin: 20px auto;
+            max-width: 900px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nn-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .nn-visualization {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .nn-layer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        
+        .layer-label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 8px);
+            grid-template-rows: repeat(7, 8px);
+            gap: 1px;
+            background: #000;
+            padding: 2px;
+        }
+        
+        .input-pixel {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            transition: background 0.3s;
+        }
+        
+        .input-pixel.active {
+            background: #333;
+        }
+        
+        .hidden-layer {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .neuron-group {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+        }
+        
+        .neuron {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            border: 1px solid #999;
+            transition: all 0.3s;
+        }
+        
+        .neuron.active {
+            background: #4CAF50;
+            border-color: #45a049;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+        
+        .output-layer {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .output-neuron {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .output-neuron.predicted {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .output-digit {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .output-prob {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .output-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .output-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease-out;
+            width: 0%;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            color: #999;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .processing {
+            animation: pulse 1s infinite;
+        }
     </style>
 </head>
 <body>
-    <h1>Handwritten Digit Recognition</h1>
+    <h1>Nexa</h1>
+    <div class="subtitle">
+        <strong>How it works:</strong> Draw a digit on the canvas below. When you click "Predict", 
+        your drawing is processed through a convolutional neural network (CNN) trained on the MNIST dataset. 
+        The network analyzes the image through multiple layers - convolutional layers that detect features, 
+        pooling layers that reduce complexity, and fully connected layers that make the final prediction. 
+        Watch the neural network simulation below to see how your digit flows through each layer and 
+        see the confidence scores for all possible digits (0-9).
+    </div>
     <canvas id="canvas" width="300" height="300"></canvas><br>
     <button id="predictBtn">Predict</button>
     <button id="clearBtn">Clear</button>
     <div id="result"></div>
+    
+    <div class="nn-container" id="nnContainer" style="display: none;">
+        <div class="nn-title">Neural Network Simulation</div>
+        <div class="nn-visualization">
+            <div class="nn-layer">
+                <div class="layer-label">Input</div>
+                <div class="input-grid" id="inputGrid"></div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="nn-layer">
+                <div class="layer-label">Conv Layers</div>
+                <div class="hidden-layer" id="convLayer"></div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="nn-layer">
+                <div class="layer-label">Dense</div>
+                <div class="hidden-layer" id="denseLayer"></div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="nn-layer">
+                <div class="layer-label">Output</div>
+                <div class="output-layer" id="outputLayer"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -24,30 +210,207 @@
         const predictBtn = document.getElementById('predictBtn');
         const clearBtn = document.getElementById('clearBtn');
         const resultDiv = document.getElementById('result');
+        const nnContainer = document.getElementById('nnContainer');
+        const inputGrid = document.getElementById('inputGrid');
+        const convLayer = document.getElementById('convLayer');
+        const denseLayer = document.getElementById('denseLayer');
+        const outputLayer = document.getElementById('outputLayer');
+        
+        // Initialize neural network visualization
+        function initNNVisualization() {
+            // Create input grid (7x7 representation of 28x28)
+            inputGrid.innerHTML = '';
+            for (let i = 0; i < 49; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'input-pixel';
+                inputGrid.appendChild(pixel);
+            }
+            
+            // Create conv layer representation
+            convLayer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const group = document.createElement('div');
+                group.className = 'neuron-group';
+                for (let j = 0; j < 8; j++) {
+                    const neuron = document.createElement('div');
+                    neuron.className = 'neuron';
+                    group.appendChild(neuron);
+                }
+                convLayer.appendChild(group);
+            }
+            
+            // Create dense layer representation
+            denseLayer.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const group = document.createElement('div');
+                group.className = 'neuron-group';
+                for (let j = 0; j < 8; j++) {
+                    const neuron = document.createElement('div');
+                    neuron.className = 'neuron';
+                    group.appendChild(neuron);
+                }
+                denseLayer.appendChild(group);
+            }
+            
+            // Create output layer (10 digits)
+            outputLayer.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'output-neuron';
+                neuron.innerHTML = `
+                    <div class="output-digit">${i}</div>
+                    <div class="output-prob">0.00%</div>
+                    <div class="output-bar">
+                        <div class="output-bar-fill"></div>
+                    </div>
+                `;
+                outputLayer.appendChild(neuron);
+            }
+        }
+        
+        function resetNNVisualization() {
+            // Reset input grid
+            const pixels = inputGrid.querySelectorAll('.input-pixel');
+            pixels.forEach(p => p.classList.remove('active'));
+            
+            // Reset conv layer
+            const convNeurons = convLayer.querySelectorAll('.neuron');
+            convNeurons.forEach(n => n.classList.remove('active'));
+            
+            // Reset dense layer
+            const denseNeurons = denseLayer.querySelectorAll('.neuron');
+            denseNeurons.forEach(n => n.classList.remove('active'));
+            
+            // Reset output layer
+            const outputNeurons = outputLayer.querySelectorAll('.output-neuron');
+            outputNeurons.forEach(n => {
+                n.classList.remove('predicted');
+                const prob = n.querySelector('.output-prob');
+                const bar = n.querySelector('.output-bar-fill');
+                prob.textContent = '0.00%';
+                bar.style.width = '0%';
+            });
+        }
+        
+        function animateNNVisualization(probabilities) {
+            // Animate input layer
+            setTimeout(() => {
+                const pixels = inputGrid.querySelectorAll('.input-pixel');
+                pixels.forEach((p, i) => {
+                    setTimeout(() => {
+                        p.classList.add('active');
+                    }, i * 5);
+                });
+            }, 100);
+            
+            // Animate conv layer
+            setTimeout(() => {
+                const neurons = convLayer.querySelectorAll('.neuron');
+                neurons.forEach((n, i) => {
+                    setTimeout(() => {
+                        n.classList.add('active');
+                    }, i * 10);
+                });
+            }, 500);
+            
+            // Animate dense layer
+            setTimeout(() => {
+                const neurons = denseLayer.querySelectorAll('.neuron');
+                neurons.forEach((n, i) => {
+                    setTimeout(() => {
+                        n.classList.add('active');
+                    }, i * 5);
+                });
+            }, 1000);
+            
+            // Animate output layer
+            setTimeout(() => {
+                const neurons = outputLayer.querySelectorAll('.output-neuron');
+                neurons.forEach((neuron, i) => {
+                    const prob = probabilities[i] || 0;
+                    const probElement = neuron.querySelector('.output-prob');
+                    const barFill = neuron.querySelector('.output-bar-fill');
+                    
+                    setTimeout(() => {
+                        probElement.textContent = (prob * 100).toFixed(2) + '%';
+                        barFill.style.width = (prob * 100) + '%';
+                        
+                        if (i === probabilities.indexOf(Math.max(...probabilities))) {
+                            neuron.classList.add('predicted');
+                        }
+                    }, i * 50);
+                });
+            }, 1500);
+        }
+        
+        // Initialize on page load
+        initNNVisualization();
 
         let drawing = false;
+        let lastX = 0;
+        let lastY = 0;
 
         // Set canvas background to white
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Set drawing properties
+        ctx.lineWidth = 15;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'black';
 
         // Mouse events for drawing
-        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mousedown', (e) => {
+            drawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        });
+        
         canvas.addEventListener('mouseup', () => drawing = false);
+        canvas.addEventListener('mouseout', () => drawing = false);
         canvas.addEventListener('mousemove', draw);
+        
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            drawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+        });
+        
+        canvas.addEventListener('touchend', () => drawing = false);
+        canvas.addEventListener('touchcancel', () => drawing = false);
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            drawLine(lastX, lastY, x, y);
+            lastX = x;
+            lastY = y;
+        });
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
 
         function draw(event) {
             if (!drawing) return;
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
-            ctx.lineWidth = 10;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = 'black';
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, y);
-            ctx.stroke();
+            drawLine(lastX, lastY, x, y);
+            lastX = x;
+            lastY = y;
         }
 
         // Clear canvas
@@ -55,12 +418,14 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             resultDiv.textContent = '';
+            nnContainer.style.display = 'none';
+            resetNNVisualization();
         });
 
         // Check if backend is running
         async function checkBackend() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/health');
+                const response = await fetch('http://127.0.0.1:8080/health');
                 const data = await response.json();
                 if (!data.model_loaded) {
                     resultDiv.textContent = 'Warning: Model not loaded. Please train the model first.';
@@ -81,8 +446,12 @@
             resultDiv.textContent = 'Processing...';
             resultDiv.style.color = 'black';
             
+            // Reset and show neural network visualization
+            resetNNVisualization();
+            nnContainer.style.display = 'block';
+            
             try {
-                const response = await fetch('http://127.0.0.1:5000/predict', {
+                const response = await fetch('http://127.0.0.1:8080/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: imageData })
@@ -92,6 +461,7 @@
                     const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
                     resultDiv.textContent = `Error: ${errorData.error || response.statusText}`;
                     resultDiv.style.color = 'red';
+                    nnContainer.style.display = 'none';
                     return;
                 }
                 
@@ -99,17 +469,24 @@
                 if (data.error) {
                     resultDiv.textContent = `Error: ${data.error}`;
                     resultDiv.style.color = 'red';
+                    nnContainer.style.display = 'none';
                 } else {
                     resultDiv.textContent = `Prediction: ${data.digit} (Confidence: ${(data.confidence * 100).toFixed(2)}%)`;
                     resultDiv.style.color = 'green';
+                    
+                    // Animate neural network with probabilities
+                    if (data.probabilities) {
+                        animateNNVisualization(data.probabilities);
+                    }
                 }
             } catch (error) {
                 if (error.message === 'Failed to fetch') {
-                    resultDiv.textContent = 'Error: Cannot connect to backend. Make sure the backend is running on http://127.0.0.1:5000';
+                    resultDiv.textContent = 'Error: Cannot connect to backend. Make sure the backend is running on http://127.0.0.1:8080';
                 } else {
                     resultDiv.textContent = `Error: ${error.message}`;
                 }
                 resultDiv.style.color = 'red';
+                nnContainer.style.display = 'none';
             }
         });
     </script>
