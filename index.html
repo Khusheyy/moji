@@ -14,144 +14,186 @@
         
         .nn-container {
             margin: 20px auto;
-            max-width: 900px;
-            padding: 20px;
-            background: #f5f5f5;
+            max-width: 1200px;
+            padding: 30px;
+            background: #1a1a1a;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .nn-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
+            margin-bottom: 20px;
+            color: #fff;
         }
         
         .nn-visualization {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            gap: 30px;
+            position: relative;
+            min-height: 500px;
         }
         
-        .nn-layer {
+        .input-image-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 120px;
+            gap: 10px;
+        }
+        
+        .input-image-box {
+            width: 120px;
+            height: 120px;
+            background: #000;
+            border: 2px solid #444;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .input-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+        
+        .input-size-label {
+            font-size: 14px;
+            color: #aaa;
+            font-weight: bold;
+        }
+        
+        .layer-arrow {
+            font-size: 32px;
+            color: #666;
+            margin: 0 10px;
+        }
+        
+        .nn-layer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
         }
         
         .layer-label {
             font-size: 12px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #666;
+            color: #aaa;
+            text-align: center;
         }
         
-        .input-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 8px);
-            grid-template-rows: repeat(7, 8px);
-            gap: 1px;
-            background: #000;
-            padding: 2px;
-        }
-        
-        .input-pixel {
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            transition: background 0.3s;
-        }
-        
-        .input-pixel.active {
-            background: #333;
-        }
-        
-        .hidden-layer {
+        .layer-nodes {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-        }
-        
-        .neuron-group {
-            display: flex;
             gap: 3px;
-            justify-content: center;
+            align-items: center;
+            position: relative;
         }
         
         .neuron {
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            background: #ddd;
-            border: 1px solid #999;
-            transition: all 0.3s;
+            background: #333;
+            border: 1px solid #555;
+            transition: all 0.4s ease;
+            position: relative;
         }
         
         .neuron.active {
-            background: #4CAF50;
-            border-color: #45a049;
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
         
-        .output-layer {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+        .neuron.semi-active {
+            background: #888;
+            border-color: #aaa;
+        }
+        
+        .neuron.inactive {
+            background: #333;
+            border-color: #555;
+        }
+        
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
         
-        .output-neuron {
+        .connection-line {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 0.5;
+            transition: stroke 0.3s;
+        }
+        
+        .connection-line.active {
+            stroke: rgba(255, 255, 255, 0.4);
+            stroke-width: 1;
+        }
+        
+        .output-layer-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            transition: all 0.3s;
+            gap: 8px;
+        }
+        
+        .output-neuron {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #333;
+            border: 2px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #aaa;
+            transition: all 0.5s ease;
+            position: relative;
         }
         
         .output-neuron.predicted {
-            border-color: #4CAF50;
-            background: #e8f5e9;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            background: #fff;
+            border-color: #fff;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
         }
         
-        .output-digit {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .output-neuron.active {
+            background: #666;
+            border-color: #888;
+            color: #fff;
         }
         
         .output-prob {
-            font-size: 12px;
+            position: absolute;
+            bottom: -20px;
+            font-size: 10px;
+            color: #aaa;
+            white-space: nowrap;
+        }
+        
+        .layer-ellipsis {
             color: #666;
-        }
-        
-        .output-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        
-        .output-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            transition: width 0.5s ease-out;
-            width: 0%;
-        }
-        
-        .arrow {
-            font-size: 24px;
-            color: #999;
+            font-size: 14px;
+            margin: 5px 0;
         }
         
         @keyframes pulse {
@@ -161,6 +203,16 @@
         
         .processing {
             animation: pulse 1s infinite;
+        }
+        
+        @keyframes flow {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        
+        .neuron.flowing {
+            animation: flow 1s infinite;
         }
     </style>
 </head>
@@ -182,24 +234,44 @@
     <div class="nn-container" id="nnContainer" style="display: none;">
         <div class="nn-title">Neural Network Simulation</div>
         <div class="nn-visualization">
-            <div class="nn-layer">
-                <div class="layer-label">Input</div>
-                <div class="input-grid" id="inputGrid"></div>
+            <!-- Input Image -->
+            <div class="input-image-container">
+                <div class="input-image-box" id="inputImageBox">
+                    <img id="inputImage" src="" alt="Input digit" style="display: none; width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div class="input-size-label">784</div>
             </div>
-            <div class="arrow">→</div>
-            <div class="nn-layer">
-                <div class="layer-label">Conv Layers</div>
-                <div class="hidden-layer" id="convLayer"></div>
+            
+            <div class="layer-arrow">→</div>
+            
+            <!-- Input Layer (784 nodes) -->
+            <div class="nn-layer-container">
+                <div class="layer-label">Input Layer<br>(784)</div>
+                <div class="layer-nodes" id="inputLayer"></div>
             </div>
-            <div class="arrow">→</div>
-            <div class="nn-layer">
-                <div class="layer-label">Dense</div>
-                <div class="hidden-layer" id="denseLayer"></div>
+            
+            <div class="layer-arrow">→</div>
+            
+            <!-- Hidden Layer 1 (128 nodes) -->
+            <div class="nn-layer-container">
+                <div class="layer-label">Hidden Layer 1<br>(128)</div>
+                <div class="layer-nodes" id="hiddenLayer1"></div>
             </div>
-            <div class="arrow">→</div>
-            <div class="nn-layer">
-                <div class="layer-label">Output</div>
-                <div class="output-layer" id="outputLayer"></div>
+            
+            <div class="layer-arrow">→</div>
+            
+            <!-- Hidden Layer 2 (64 nodes) -->
+            <div class="nn-layer-container">
+                <div class="layer-label">Hidden Layer 2<br>(64)</div>
+                <div class="layer-nodes" id="hiddenLayer2"></div>
+            </div>
+            
+            <div class="layer-arrow">→</div>
+            
+            <!-- Output Layer (10 nodes) -->
+            <div class="nn-layer-container">
+                <div class="layer-label">Output Layer<br>(10)</div>
+                <div class="output-layer-container" id="outputLayer"></div>
             </div>
         </div>
     </div>
@@ -211,136 +283,173 @@
         const clearBtn = document.getElementById('clearBtn');
         const resultDiv = document.getElementById('result');
         const nnContainer = document.getElementById('nnContainer');
-        const inputGrid = document.getElementById('inputGrid');
-        const convLayer = document.getElementById('convLayer');
-        const denseLayer = document.getElementById('denseLayer');
+        const inputImage = document.getElementById('inputImage');
+        const inputImageBox = document.getElementById('inputImageBox');
+        const inputLayer = document.getElementById('inputLayer');
+        const hiddenLayer1 = document.getElementById('hiddenLayer1');
+        const hiddenLayer2 = document.getElementById('hiddenLayer2');
         const outputLayer = document.getElementById('outputLayer');
         
         // Initialize neural network visualization
         function initNNVisualization() {
-            // Create input grid (7x7 representation of 28x28)
-            inputGrid.innerHTML = '';
-            for (let i = 0; i < 49; i++) {
-                const pixel = document.createElement('div');
-                pixel.className = 'input-pixel';
-                inputGrid.appendChild(pixel);
+            // Create input layer (784 nodes - show 20 with ellipsis)
+            inputLayer.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                inputLayer.appendChild(neuron);
+            }
+            const ellipsis1 = document.createElement('div');
+            ellipsis1.className = 'layer-ellipsis';
+            ellipsis1.textContent = '...';
+            inputLayer.appendChild(ellipsis1);
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                inputLayer.appendChild(neuron);
             }
             
-            // Create conv layer representation
-            convLayer.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                const group = document.createElement('div');
-                group.className = 'neuron-group';
-                for (let j = 0; j < 8; j++) {
-                    const neuron = document.createElement('div');
-                    neuron.className = 'neuron';
-                    group.appendChild(neuron);
-                }
-                convLayer.appendChild(group);
+            // Create hidden layer 1 (128 nodes - show 20 with ellipsis)
+            hiddenLayer1.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                hiddenLayer1.appendChild(neuron);
+            }
+            const ellipsis2 = document.createElement('div');
+            ellipsis2.className = 'layer-ellipsis';
+            ellipsis2.textContent = '...';
+            hiddenLayer1.appendChild(ellipsis2);
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                hiddenLayer1.appendChild(neuron);
             }
             
-            // Create dense layer representation
-            denseLayer.innerHTML = '';
-            for (let i = 0; i < 4; i++) {
-                const group = document.createElement('div');
-                group.className = 'neuron-group';
-                for (let j = 0; j < 8; j++) {
-                    const neuron = document.createElement('div');
-                    neuron.className = 'neuron';
-                    group.appendChild(neuron);
-                }
-                denseLayer.appendChild(group);
+            // Create hidden layer 2 (64 nodes - show 20 with ellipsis)
+            hiddenLayer2.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                hiddenLayer2.appendChild(neuron);
+            }
+            const ellipsis3 = document.createElement('div');
+            ellipsis3.className = 'layer-ellipsis';
+            ellipsis3.textContent = '...';
+            hiddenLayer2.appendChild(ellipsis3);
+            for (let i = 0; i < 10; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron inactive';
+                hiddenLayer2.appendChild(neuron);
             }
             
             // Create output layer (10 digits)
             outputLayer.innerHTML = '';
             for (let i = 0; i < 10; i++) {
                 const neuron = document.createElement('div');
-                neuron.className = 'output-neuron';
+                neuron.className = 'output-neuron inactive';
                 neuron.innerHTML = `
-                    <div class="output-digit">${i}</div>
-                    <div class="output-prob">0.00%</div>
-                    <div class="output-bar">
-                        <div class="output-bar-fill"></div>
-                    </div>
+                    ${i}
+                    <div class="output-prob">0%</div>
                 `;
                 outputLayer.appendChild(neuron);
             }
         }
         
         function resetNNVisualization() {
-            // Reset input grid
-            const pixels = inputGrid.querySelectorAll('.input-pixel');
-            pixels.forEach(p => p.classList.remove('active'));
+            // Reset input image
+            inputImage.style.display = 'none';
             
-            // Reset conv layer
-            const convNeurons = convLayer.querySelectorAll('.neuron');
-            convNeurons.forEach(n => n.classList.remove('active'));
+            // Reset all neurons
+            const allNeurons = document.querySelectorAll('.neuron, .output-neuron');
+            allNeurons.forEach(n => {
+                n.classList.remove('active', 'semi-active', 'predicted', 'flowing');
+                n.classList.add('inactive');
+            });
             
-            // Reset dense layer
-            const denseNeurons = denseLayer.querySelectorAll('.neuron');
-            denseNeurons.forEach(n => n.classList.remove('active'));
-            
-            // Reset output layer
+            // Reset output probabilities
             const outputNeurons = outputLayer.querySelectorAll('.output-neuron');
-            outputNeurons.forEach(n => {
-                n.classList.remove('predicted');
-                const prob = n.querySelector('.output-prob');
-                const bar = n.querySelector('.output-bar-fill');
-                prob.textContent = '0.00%';
-                bar.style.width = '0%';
+            outputNeurons.forEach((neuron, i) => {
+                const probElement = neuron.querySelector('.output-prob');
+                if (probElement) {
+                    probElement.textContent = '0%';
+                }
             });
         }
         
-        function animateNNVisualization(probabilities) {
-            // Animate input layer
-            setTimeout(() => {
-                const pixels = inputGrid.querySelectorAll('.input-pixel');
-                pixels.forEach((p, i) => {
-                    setTimeout(() => {
-                        p.classList.add('active');
-                    }, i * 5);
-                });
-            }, 100);
+        function animateNNVisualization(probabilities, imageData) {
+            // Show input image
+            inputImage.src = imageData;
+            inputImage.style.display = 'block';
             
-            // Animate conv layer
+            // Animate input layer (784 nodes)
             setTimeout(() => {
-                const neurons = convLayer.querySelectorAll('.neuron');
+                const neurons = inputLayer.querySelectorAll('.neuron');
                 neurons.forEach((n, i) => {
                     setTimeout(() => {
-                        n.classList.add('active');
-                    }, i * 10);
+                        n.classList.remove('inactive');
+                        n.classList.add('active', 'flowing');
+                        setTimeout(() => n.classList.remove('flowing'), 1000);
+                    }, i * 20);
                 });
-            }, 500);
+            }, 200);
             
-            // Animate dense layer
+            // Animate hidden layer 1 (128 nodes)
             setTimeout(() => {
-                const neurons = denseLayer.querySelectorAll('.neuron');
+                const neurons = hiddenLayer1.querySelectorAll('.neuron');
                 neurons.forEach((n, i) => {
                     setTimeout(() => {
-                        n.classList.add('active');
-                    }, i * 5);
+                        n.classList.remove('inactive');
+                        n.classList.add('semi-active', 'flowing');
+                        setTimeout(() => {
+                            n.classList.remove('flowing');
+                            n.classList.add('active');
+                        }, 500);
+                    }, i * 15);
                 });
             }, 1000);
             
-            // Animate output layer
+            // Animate hidden layer 2 (64 nodes)
+            setTimeout(() => {
+                const neurons = hiddenLayer2.querySelectorAll('.neuron');
+                neurons.forEach((n, i) => {
+                    setTimeout(() => {
+                        n.classList.remove('inactive');
+                        n.classList.add('semi-active', 'flowing');
+                        setTimeout(() => {
+                            n.classList.remove('flowing');
+                            n.classList.add('active');
+                        }, 500);
+                    }, i * 15);
+                });
+            }, 2000);
+            
+            // Animate output layer (10 digits)
             setTimeout(() => {
                 const neurons = outputLayer.querySelectorAll('.output-neuron');
+                const maxProb = Math.max(...probabilities);
+                const predictedIndex = probabilities.indexOf(maxProb);
+                
                 neurons.forEach((neuron, i) => {
                     const prob = probabilities[i] || 0;
                     const probElement = neuron.querySelector('.output-prob');
-                    const barFill = neuron.querySelector('.output-bar-fill');
                     
                     setTimeout(() => {
-                        probElement.textContent = (prob * 100).toFixed(2) + '%';
-                        barFill.style.width = (prob * 100) + '%';
+                        neuron.classList.remove('inactive');
+                        neuron.classList.add('active');
                         
-                        if (i === probabilities.indexOf(Math.max(...probabilities))) {
-                            neuron.classList.add('predicted');
+                        if (probElement) {
+                            probElement.textContent = (prob * 100).toFixed(1) + '%';
                         }
-                    }, i * 50);
+                        
+                        if (i === predictedIndex) {
+                            setTimeout(() => {
+                                neuron.classList.add('predicted');
+                            }, 300);
+                        }
+                    }, i * 100);
                 });
-            }, 1500);
+            }, 3000);
         }
         
         // Initialize on page load
@@ -476,7 +585,7 @@
                     
                     // Animate neural network with probabilities
                     if (data.probabilities) {
-                        animateNNVisualization(data.probabilities);
+                        animateNNVisualization(data.probabilities, imageData);
                     }
                 }
             } catch (error) {
