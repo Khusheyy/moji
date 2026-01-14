@@ -74,16 +74,13 @@ def predict():
         # After normalization: white becomes 1.0, black becomes 0.0
         image_array = image_array / 255.0
 
-        # Reshape for model input
-        # Add batch and channel dimensions
         image_array = image_array.reshape(1, 28, 28, 1)
 
-        # Predict
+        # predict
         predictions = model.predict(image_array, verbose=0)
         predicted_digit = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
 
-        # Return all probabilities for visualization
         probabilities = [float(p) for p in predictions[0]]
 
         return jsonify({
