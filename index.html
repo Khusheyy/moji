@@ -148,8 +148,14 @@
         .output-layer-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             gap: 8px;
+        }
+        
+        .output-neuron-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .output-neuron {
@@ -165,7 +171,7 @@
             font-weight: bold;
             color: #aaa;
             transition: all 0.5s ease;
-            position: relative;
+            flex-shrink: 0;
         }
         
         .output-neuron.predicted {
@@ -183,11 +189,17 @@
         }
         
         .output-prob {
-            position: absolute;
-            bottom: -20px;
-            font-size: 10px;
+            font-size: 14px;
             color: #aaa;
-            white-space: nowrap;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: left;
+            transition: color 0.3s;
+        }
+        
+        .output-neuron-wrapper.predicted .output-prob {
+            color: #fff;
+            font-size: 16px;
         }
         
         .layer-ellipsis {
@@ -346,13 +358,20 @@
             // Create output layer (10 digits)
             outputLayer.innerHTML = '';
             for (let i = 0; i < 10; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'output-neuron-wrapper';
+                
                 const neuron = document.createElement('div');
                 neuron.className = 'output-neuron inactive';
-                neuron.innerHTML = `
-                    ${i}
-                    <div class="output-prob">0%</div>
-                `;
-                outputLayer.appendChild(neuron);
+                neuron.textContent = i;
+                
+                const prob = document.createElement('div');
+                prob.className = 'output-prob';
+                prob.textContent = '0%';
+                
+                wrapper.appendChild(neuron);
+                wrapper.appendChild(prob);
+                outputLayer.appendChild(wrapper);
             }
         }
         
@@ -367,10 +386,16 @@
                 n.classList.add('inactive');
             });
             
-            // Reset output probabilities
-            const outputNeurons = outputLayer.querySelectorAll('.output-neuron');
-            outputNeurons.forEach((neuron, i) => {
-                const probElement = neuron.querySelector('.output-prob');
+            // Reset output layer wrappers and probabilities
+            const outputWrappers = outputLayer.querySelectorAll('.output-neuron-wrapper');
+            outputWrappers.forEach(wrapper => {
+                wrapper.classList.remove('predicted');
+                const neuron = wrapper.querySelector('.output-neuron');
+                const probElement = wrapper.querySelector('.output-prob');
+                if (neuron) {
+                    neuron.classList.remove('active', 'predicted');
+                    neuron.classList.add('inactive');
+                }
                 if (probElement) {
                     probElement.textContent = '0%';
                 }
@@ -426,17 +451,20 @@
             
             // Animate output layer (10 digits)
             setTimeout(() => {
-                const neurons = outputLayer.querySelectorAll('.output-neuron');
+                const wrappers = outputLayer.querySelectorAll('.output-neuron-wrapper');
                 const maxProb = Math.max(...probabilities);
                 const predictedIndex = probabilities.indexOf(maxProb);
                 
-                neurons.forEach((neuron, i) => {
+                wrappers.forEach((wrapper, i) => {
                     const prob = probabilities[i] || 0;
-                    const probElement = neuron.querySelector('.output-prob');
+                    const neuron = wrapper.querySelector('.output-neuron');
+                    const probElement = wrapper.querySelector('.output-prob');
                     
                     setTimeout(() => {
-                        neuron.classList.remove('inactive');
-                        neuron.classList.add('active');
+                        if (neuron) {
+                            neuron.classList.remove('inactive');
+                            neuron.classList.add('active');
+                        }
                         
                         if (probElement) {
                             probElement.textContent = (prob * 100).toFixed(1) + '%';
@@ -444,7 +472,10 @@
                         
                         if (i === predictedIndex) {
                             setTimeout(() => {
-                                neuron.classList.add('predicted');
+                                if (neuron) {
+                                    neuron.classList.add('predicted');
+                                }
+                                wrapper.classList.add('predicted');
                             }, 300);
                         }
                     }, i * 100);

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
@@ -7,13 +7,15 @@ import io
 import base64
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.',
+            static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
 # Load the trained model
 model_path = 'digit_model.h5'
 if not os.path.exists(model_path):
-    print(f"Warning: Model file '{model_path}' not found. Please train the model first.")
+    print(
+        f"Warning: Model file '{model_path}' not found. Please train the model first.")
     model = None
 else:
     try:
@@ -23,6 +25,7 @@ else:
         print(f"Error loading model: {e}")
         model = None
 
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -31,54 +34,60 @@ def health():
         'model_loaded': model is not None
     })
 
+
+@app.route('/', methods=['GET'])
+def serve_index():
+    """Serve the index.html file"""
+    return send_from_directory('.', 'index.html')
+
+
 @app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
     if request.method == 'OPTIONS':
         # Handle preflight request
         return '', 200
-    
+
     if model is None:
         return jsonify({'error': 'Model not loaded. Please train the model first.'}), 500
-    
+
     try:
         # Get Base64 image from request
         data = request.get_json()
         if not data or 'image' not in data:
             return jsonify({'error': 'No image data provided'}), 400
-        
-        image_data = data['image'].split(',')[1] if ',' in data['image'] else data['image']
+
+        image_data = data['image'].split(
+            ',')[1] if ',' in data['image'] else data['image']
         image_bytes = base64.b64decode(image_data)
-        
+
         # Convert to PIL Image
         image = Image.open(io.BytesIO(image_bytes)).convert('L')  # Grayscale
-        
+
         # Resize to 28x28 using LANCZOS for better quality
         image = image.resize((28, 28), Image.Resampling.LANCZOS)
-        
+
         # Convert to numpy array
         image_array = np.array(image).astype('float32')
-        
-        # MNIST format: black background (0) with white digits (255)
-        # Our canvas: white background (255) with black strokes (0)
-        # So we need to invert to match MNIST format
-        image_array = 255.0 - image_array
-        
-        # Normalize to 0-1 range (same as training: / 255.0)
+
+        # Normalize to 0-1 range (same as training)
+        # Canvas: white background (255) with black strokes (0)
+        # After normalization: white becomes 1.0, black becomes 0.0
         image_array = image_array / 255.0
-        
+
         # Reshape for model input
-        image_array = image_array.reshape(1, 28, 28, 1)  # Add batch and channel dimensions
-        
+        # Add batch and channel dimensions
+        image_array = image_array.reshape(1, 28, 28, 1)
+
         # Predict
         predictions = model.predict(image_array, verbose=0)
         predicted_digit = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
-        
+
         # Return all probabilities for visualization
         probabilities = [float(p) for p in predictions[0]]
-        
+
         return jsonify({
-            'digit': int(predicted_digit), 
+            'digit': int(predicted_digit),
             'confidence': confidence,
             'probabilities': probabilities
         })
@@ -88,6 +97,7 @@ def predict():
         print(f"Error in predict: {error_msg}")
         print(traceback.format_exc())
         return jsonify({'error': error_msg}), 400
+
 
 if __name__ == '__main__':
     print("Starting Flask server on http://127.0.0.1:8080")
