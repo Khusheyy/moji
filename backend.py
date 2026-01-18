@@ -9,9 +9,8 @@ import os
 
 app = Flask(__name__, static_folder='.',
             static_url_path='')
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
-# Load the trained model
 model_path = 'digit_model.h5'
 if not os.path.exists(model_path):
     print(
@@ -28,7 +27,6 @@ else:
 
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
     return jsonify({
         'status': 'ok',
         'model_loaded': model is not None
@@ -37,21 +35,18 @@ def health():
 
 @app.route('/', methods=['GET'])
 def serve_index():
-    """Serve the index.html file"""
     return send_from_directory('.', 'index.html')
 
 
 @app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
     if request.method == 'OPTIONS':
-        # Handle preflight request
         return '', 200
 
     if model is None:
         return jsonify({'error': 'Model not loaded. Please train the model first.'}), 500
 
     try:
-        # Get Base64 image from request
         data = request.get_json()
         if not data or 'image' not in data:
             return jsonify({'error': 'No image data provided'}), 400
@@ -60,23 +55,25 @@ def predict():
             ',')[1] if ',' in data['image'] else data['image']
         image_bytes = base64.b64decode(image_data)
 
-        # Convert to PIL Image
-        image = Image.open(io.BytesIO(image_bytes)).convert('L')  # Grayscale
-
-        # Resize to 28x28 using LANCZOS for better quality
+        image = Image.open(io.BytesIO(image_bytes)).convert('L')
         image = image.resize((28, 28), Image.Resampling.LANCZOS)
 
         # Convert to numpy array
-        image_array = np.array(image).astype('float32')
+        image_array = np.array(image)
 
-        # Normalize to 0-1 range (same as training)
-        # Canvas: white background (255) with black strokes (0)
-        # After normalization: white becomes 1.0, black becomes 0.0
+        # CRITICAL FIX: Invert the image
+        # Your canvas: BLACK digits on WHITE background
+        # MNIST trained: WHITE digits on BLACK background
+        # This line flips black <-> white to match training data
+        image_array = 255 - image_array
+
+        # Normalize to 0-1 range
         image_array = image_array / 255.0
 
+        # Reshape for model input
         image_array = image_array.reshape(1, 28, 28, 1)
 
-        # predict
+        # Make prediction
         predictions = model.predict(image_array, verbose=0)
         predicted_digit = np.argmax(predictions[0])
         confidence = float(np.max(predictions[0]))
