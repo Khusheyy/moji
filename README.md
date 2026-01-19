@@ -1,56 +1,88 @@
-# Handwritten Digit Recognition
+#  Handwritten Digit Recognition
 
-A web application for recognizing handwritten digits using a TensorFlow/Keras CNN model.
+A simple web application that recognizes handwritten digits (0-9) using machine learning. Draw a digit on your screen, and the AI predicts what you wrote!
 
-## Setup
+---
 
-1. **Create and activate virtual environment** (if not already done):
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+## 📋 What You Need
 
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- Python 3.7 or higher
+- pip (Python package manager)
+- A web browser
 
-3. **Train the model** (if not already trained):
-   ```bash
-   python train_model.py
-   ```
-   This will create `digit_model.h5` in the project directory.
+---
 
-## Running the Application
+## 🚀 Quick Start (3 Steps)
 
-1. **Start the backend server**:
-   ```bash
-   source venv/bin/activate
-   python backend.py
-   ```
-   Or use the convenience script:
-   ```bash
-   ./start_backend.sh
-   ```
-   
-   The server will start on `http://127.0.0.1:8080`
+### Step 1: Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-2. **Open the frontend**:
-   - Open `index.html` in your web browser
-   - Or serve it using a local web server:
-     ```bash
-     python3 -m http.server 8000
-     ```
-     Then open `http://localhost:8000` in your browser
+### Step 2: Train the Model (First Time Only)
+```bash
+python train_model.py
+```
+This trains the neural network on the MNIST dataset and saves it as `digit_model.h5`. Takes about 5-10 minutes. You only need to do this once!
 
-## Usage
+### Step 3: Start the Application
+```bash
+python backend.py
+```
+Then open `index.html` in your web browser.
 
-1. Draw a digit on the canvas
-2. Click "Predict" to get the prediction
-3. Click "Clear" to clear the canvas
+---
 
-## Note
+## 💡 How to Use
 
-- The backend runs on port **8080** (not 5000) because macOS uses port 5000 for AirPlay Receiver
-- Make sure the backend is running before using the frontend
-- The model file (`digit_model.h5`) must exist for predictions to work
+1. **Draw** a digit (0-9) on the canvas using your mouse
+2. **Click "Predict"** to see what the AI thinks you drew
+3. **Click "Clear"** to erase and try again
+
+
+---
+
+## ⚙️ Technical Details
+
+- **Backend**: Python Flask server running on `http://localhost:8080`
+- **Frontend**: HTML/CSS/JavaScript for drawing interface
+- **Model**: Convolutional Neural Network (CNN) trained on MNIST handwritten digit dataset
+- **Framework**: TensorFlow/Keras
+
+---
+
+## 📝 Important Notes
+
+- ⚠️ Make sure to run `python train_model.py` before starting the backend (generates `digit_model.h5`)
+- ⚠️ The backend must be running before you can use the application
+- 🍎 macOS uses port 5000 for AirPlay, so this app uses port 8080 instead
+- 📁 All files must be in the same directory
+
+---
+
+## 📁 Project Structure
+
+```
+moji/
+├── backend.py          # Flask server for predictions
+├── train_model.py      # Script to train the neural network
+├── index.html          # Frontend (draw interface)
+├── digit_model.h5      # Trained AI model (created after training)
+├── requirements.txt    # Python dependencies
+└── README.md          # This file
+```
+
+---
+
+## ❓ Troubleshooting
+
+**Model not found error?**
+- Run `python train_model.py` first
+
+**Can't connect to backend?**
+- Make sure `python backend.py` is running
+- Check that port 8080 is available
+
+**Drawing doesn't work?**
+- Try a different browser (Chrome, Firefox, Safari)
+- Make sure JavaScript is enabled
