@@ -7,7 +7,7 @@
     <title>Nexa - Handwritten Digit Recognition</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             text-align: center;
         }
 
@@ -275,15 +275,15 @@
 </head>
 
 <body>
-    <h1>Nexa</h1>
+    <h1>moji</h1>
     <div class="subtitle">
         <strong>how it works:</strong> draw a digit on the canvas below. When you click "Predict",
         your 28×28 pixel image is sent to a CNN model trained on 60,000 handwritten digits from the MNIST dataset.
         The model uses two convolutional layers (with 32 and 64 filters) to detect edge patterns and shapes,
         two pooling layers to compress spatial information, then flattens and passes through two fully-connected layers
-        (128 → 10 neurons) to produce confidence scores for each digit (0-9).
-        The visualization below is a simplified illustration of the data flow—it doesn't represent the actual
-        convolutional and pooling operations.
+        (128 -> 10 neurons) to produce confidence scores for each digit (0-9). The digit with the highest confidence is
+        returned as the prediction.
+        so go ahead, draw a digit and see if moji can recognize it!💫
     </div>
     <canvas id="canvas" width="300" height="300"></canvas><br>
     <button id="predictBtn">Predict</button>
